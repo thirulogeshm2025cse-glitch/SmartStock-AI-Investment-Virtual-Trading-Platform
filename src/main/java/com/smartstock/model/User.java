@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
  */
 public class User {
     private String userId;
+    private String name;
     private String username;
     private String passwordHash;
     private String email;
@@ -19,19 +20,19 @@ public class User {
     }
 
     public User(String userId, String username, String passwordHash, String email, double virtualBalance) {
-        this.userId = userId;
-        this.username = username;
-        this.passwordHash = passwordHash;
-        this.email = email;
-        this.virtualBalance = virtualBalance;
-        this.createdAt = LocalDateTime.now();
+        this(userId, username, email, username, passwordHash, virtualBalance, LocalDateTime.now());
     }
 
-    public User(String userId, String username, String passwordHash, String email, double virtualBalance, LocalDateTime createdAt) {
+    public User(String userId, String name, String email, String username, String passwordHash, double virtualBalance) {
+        this(userId, name, email, username, passwordHash, virtualBalance, LocalDateTime.now());
+    }
+
+    public User(String userId, String name, String email, String username, String passwordHash, double virtualBalance, LocalDateTime createdAt) {
         this.userId = userId;
+        this.name = name;
+        this.email = email;
         this.username = username;
         this.passwordHash = passwordHash;
-        this.email = email;
         this.virtualBalance = virtualBalance;
         this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
     }
@@ -43,6 +44,14 @@ public class User {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getName() {
+        return name != null ? name : username;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getUsername() {
@@ -89,6 +98,7 @@ public class User {
     public String toString() {
         return "User{" +
                 "userId='" + userId + '\'' +
+                ", name='" + name + '\'' +
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
                 ", virtualBalance=$" + String.format("%.2f", virtualBalance) +

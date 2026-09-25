@@ -16,6 +16,7 @@ import java.util.Scanner;
  * and dispatching user selections to the appropriate service layers.
  */
 public class ConsoleMenuController {
+    private final UserController userController;
     private final UserService userService;
     private final StockService stockService;
     private final TradingService tradingService;
@@ -23,12 +24,14 @@ public class ConsoleMenuController {
     private final PredictionService predictionService;
     private final Scanner scanner;
 
-    public ConsoleMenuController(UserService userService,
+    public ConsoleMenuController(UserController userController,
+                                 UserService userService,
                                  StockService stockService,
                                  TradingService tradingService,
                                  PortfolioService portfolioService,
                                  PredictionService predictionService,
                                  Scanner scanner) {
+        this.userController = userController != null ? userController : new UserController(userService, scanner);
         this.userService = userService;
         this.stockService = stockService;
         this.tradingService = tradingService;
@@ -37,13 +40,34 @@ public class ConsoleMenuController {
         this.scanner = scanner;
     }
 
+    public ConsoleMenuController(UserService userService,
+                                 StockService stockService,
+                                 TradingService tradingService,
+                                 PortfolioService portfolioService,
+                                 PredictionService predictionService,
+                                 Scanner scanner) {
+        this(new UserController(userService, scanner), userService, stockService, tradingService, portfolioService, predictionService, scanner);
+    }
+
+    public UserController getUserController() {
+        return userController;
+    }
+
     /**
-     * Renders the primary console menu.
+     * Renders the primary console menu with active user session status.
      */
     public void displayMenu() {
-        System.out.println("\n========== SMARTSTOCK MAIN MENU ==========");
-        System.out.println(" 1. Register");
-        System.out.println(" 2. Login");
+        System.out.println("\n==================================================");
+        System.out.println("              SMARTSTOCK MAIN MENU                ");
+        if (userController.isLoggedIn()) {
+            System.out.println(String.format(" [Active Session: %s (@%s) | Balance: %s]",
+                    userController.getCurrentUser().getName(),
+                    userController.getCurrentUser().getUsername(),
+                    ConsoleUtils.formatCurrency(userController.getCurrentUser().getVirtualBalance())));
+        }
+        System.out.println("==================================================");
+        System.out.println(" 1. Register Account");
+        System.out.println(userController.isLoggedIn() ? " 2. User Dashboard / Account Info" : " 2. Login");
         System.out.println(" 3. View Stocks");
         System.out.println(" 4. Buy Stock");
         System.out.println(" 5. Sell Stock");
@@ -51,7 +75,7 @@ public class ConsoleMenuController {
         System.out.println(" 7. View Transactions");
         System.out.println(" 8. AI Prediction");
         System.out.println(" 9. Exit");
-        System.out.println("==========================================");
+        System.out.println("==================================================");
         System.out.print("Enter your choice (1-9): ");
     }
 
@@ -100,15 +124,15 @@ public class ConsoleMenuController {
     }
 
     private void handleRegister() {
-        ConsoleUtils.printSectionHeader("1. User Registration");
-        ConsoleUtils.printInfo("[Day 1 Foundation] User Registration architecture is initialized.");
-        ConsoleUtils.printInfo("Scheduled for full interactive implementation in Day 2 (User Management & Auth).");
+        userController.handleRegister();
     }
 
     private void handleLogin() {
-        ConsoleUtils.printSectionHeader("2. User Login");
-        ConsoleUtils.printInfo("[Day 1 Foundation] User Login architecture is initialized.");
-        ConsoleUtils.printInfo("Scheduled for full interactive implementation in Day 2 (User Management & Auth).");
+        if (userController.isLoggedIn()) {
+            userController.displayUserDashboard();
+        } else {
+            userController.handleLogin();
+        }
     }
 
     private void handleViewStocks() {
@@ -167,6 +191,10 @@ public class ConsoleMenuController {
 
     private void handleExit() {
         ConsoleUtils.printSectionHeader("9. Exit");
-        ConsoleUtils.printSuccess("Thank you for using SmartStock Platform. Exiting safely...");
+        if (userController != null && userController.isLoggedIn()) {
+            ConsoleUtils.printSuccess("Thank you for using SmartStock Platform, " + userController.getCurrentUser().getName() + ". Exiting safely...");
+        } else {
+            ConsoleUtils.printSuccess("Thank you for using SmartStock Platform. Exiting safely...");
+        }
     }
 }

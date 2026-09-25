@@ -19,6 +19,8 @@ public class InMemoryUserRepository implements UserRepository {
         }
         if (user.getUserId() == null || user.getUserId().isBlank()) {
             user.setUserId(UUID.randomUUID().toString());
+        } else {
+            user.setUserId(user.getUserId().trim());
         }
         userStorage.put(user.getUserId(), user);
         return user;
@@ -27,14 +29,14 @@ public class InMemoryUserRepository implements UserRepository {
     @Override
     public Optional<User> findById(String userId) {
         if (userId == null) return Optional.empty();
-        return Optional.ofNullable(userStorage.get(userId));
+        return Optional.ofNullable(userStorage.get(userId.trim()));
     }
 
     @Override
     public Optional<User> findByUsername(String username) {
         if (username == null) return Optional.empty();
         return userStorage.values().stream()
-                .filter(u -> u.getUsername().equalsIgnoreCase(username.trim()))
+                .filter(u -> u.getUsername() != null && u.getUsername().equalsIgnoreCase(username.trim()))
                 .findFirst();
     }
 
@@ -42,7 +44,7 @@ public class InMemoryUserRepository implements UserRepository {
     public Optional<User> findByEmail(String email) {
         if (email == null) return Optional.empty();
         return userStorage.values().stream()
-                .filter(u -> u.getEmail().equalsIgnoreCase(email.trim()))
+                .filter(u -> u.getEmail() != null && u.getEmail().equalsIgnoreCase(email.trim()))
                 .findFirst();
     }
 
@@ -62,9 +64,15 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
+    public boolean existsById(String userId) {
+        if (userId == null) return false;
+        return userStorage.containsKey(userId.trim());
+    }
+
+    @Override
     public void deleteById(String userId) {
         if (userId != null) {
-            userStorage.remove(userId);
+            userStorage.remove(userId.trim());
         }
     }
 }

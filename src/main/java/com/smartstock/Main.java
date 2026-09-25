@@ -1,6 +1,7 @@
 package com.smartstock;
 
 import com.smartstock.controller.ConsoleMenuController;
+import com.smartstock.controller.UserController;
 import com.smartstock.repository.PortfolioRepository;
 import com.smartstock.repository.StockRepository;
 import com.smartstock.repository.TransactionRepository;
@@ -39,7 +40,7 @@ public class Main {
         TransactionRepository transactionRepository = new InMemoryTransactionRepository();
 
         // 2. Initialize Services (Business Layer)
-        UserService userService = new UserServiceImpl(userRepository);
+        UserService userService = new UserServiceImpl(userRepository, portfolioRepository);
         StockService stockService = new StockServiceImpl(stockRepository);
         TradingService tradingService = new TradingServiceImpl(
                 userRepository, stockRepository, portfolioRepository, transactionRepository
@@ -47,14 +48,15 @@ public class Main {
         PortfolioService portfolioService = new PortfolioServiceImpl(portfolioRepository, stockRepository);
         PredictionService predictionService = new PredictionServiceImpl(stockRepository);
 
-        // 3. Initialize Controller (Presentation Layer)
+        // 3. Initialize Presentation Controllers
         Scanner scanner = new Scanner(System.in);
+        UserController userController = new UserController(userService, scanner);
         ConsoleMenuController controller = new ConsoleMenuController(
-                userService, stockService, tradingService, portfolioService, predictionService, scanner
+                userController, userService, stockService, tradingService, portfolioService, predictionService, scanner
         );
 
         ConsoleUtils.printInfo("Platform initialized with layered architecture.");
-        ConsoleUtils.printInfo("Day 1 Foundation active. Ready for navigation.\n");
+        ConsoleUtils.printInfo("Day 2 User Management & Authentication active. Ready for registration and login.\n");
 
         // 4. Interactive Console Loop
         boolean running = true;
